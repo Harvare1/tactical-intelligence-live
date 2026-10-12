@@ -17,16 +17,19 @@ _FAN_TEMPLATES = {
         "pressing_trigger": "{team} keeps winning the ball straight back after losing it — the press is on.",
         "flank_overload": "{team} is building almost everything down the {side} side right now.",
         "progressive_channel": "{team} is skipping the midfield and going direct down the {channel} channel.",
+        "control_shift": "{team} has taken the initiative — the rhythm of the match has shifted.",
     },
     "sv": {
         "pressing_trigger": "{team} vinner tillbaka bollen direkt efter varje bortfall — presset biter.",
         "flank_overload": "{team} bygger nästan allt via {side_sv} just nu.",
         "progressive_channel": "{team} hoppar över mittfältet och spelar direkt via {channel_sv}.",
+        "control_shift": "{team} har tagit initiativet — matchrytmen har vänt.",
     },
     "es": {
         "pressing_trigger": "{team} recupera el balón casi al instante cada vez que lo pierde: la presión aprieta.",
         "flank_overload": "{team} está construyendo casi todo por el lado {side_es} ahora mismo.",
         "progressive_channel": "{team} se salta el mediocampo y juega directo por el carril {channel_es}.",
+        "control_shift": "{team} ha tomado la iniciativa: el ritmo del partido ha cambiado.",
     },
 }
 

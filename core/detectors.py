@@ -163,10 +163,60 @@ def detect_progressive_channels(
     return insights
 
 
+def detect_control_shifts(events: list[Event], window_minutes: int = 5, min_swing: float = 15.0) -> list[Insight]:
+    """Find meaningful changes of initiative using only generic event pressure.
+
+    The index intentionally avoids xG or proprietary models. It combines final-
+    third entries, shots, pressure actions and recoveries in fixed windows, then
+    emits a signal only when the leading team changes and the swing is material.
+    """
+    if not events:
+        return []
+    windows = []
+    max_minute = max(event.minute for event in events)
+    for start in range(0, max_minute + 1, window_minutes):
+        chunk = [event for event in events if start <= event.minute < start + window_minutes]
+        scores, evidence = {}, {}
+        for team in ("home", "away"):
+            own = [event for event in chunk if event.team == team]
+            entries = [event for event in own if event.target_x is not None and
+                       ((event.target_x >= 70 and team == "home") or (event.target_x <= 35 and team == "away"))]
+            shots = [event for event in own if event.type in ("shot", "goal")]
+            pressure = [event for event in own if event.type == "pressure"]
+            regains = [event for event in own if event.type in ("recovery", "interception")]
+            scores[team] = len(entries) + 2.0 * len(shots) + 0.35 * len(pressure) + 0.75 * len(regains)
+            evidence[team] = entries + shots + pressure + regains
+        windows.append((start, scores["home"] - scores["away"], evidence))
+
+    insights = []
+    for previous, current in zip(windows, windows[1:]):
+        start, delta, evidence = current
+        if not previous[1] or not delta or previous[1] * delta >= 0 or abs(delta - previous[1]) < min_swing:
+            continue
+        team = "home" if delta > 0 else "away"
+        supporting = sorted(evidence[team], key=_seconds)
+        if len(supporting) < 4:
+            continue
+        swing = abs(delta - previous[1])
+        insights.append(Insight(
+            id=_next_id(), minute=start, category="control_shift", team=team,
+            headline=f"{team} has taken control of the match rhythm",
+            evidence=Evidence(event_ids=[event.id for event in supporting], metric="control_swing",
+                value=round(swing, 1), description=(
+                    f"The transparent pressure index swung {swing:.1f} points toward {team} "
+                    f"between the {previous[0]}'–{previous[0] + window_minutes}' and "
+                    f"{start}'–{start + window_minutes}' windows.")),
+            confidence=min(.95, .55 + swing / 40),
+            params={"swing": round(swing, 1), "window": window_minutes},
+        ))
+    return insights
+
+
 def run_all_detectors(events: list[Event]) -> list[Insight]:
     insights = []
     insights += detect_pressing_triggers(events)
     insights += detect_flank_overloads(events)
     insights += detect_progressive_channels(events)
+    insights += detect_control_shifts(events)
     insights.sort(key=lambda i: i.minute)
     return insights

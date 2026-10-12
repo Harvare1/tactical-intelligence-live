@@ -32,6 +32,10 @@ _TEMPLATES = {
         "{team} are cutting out the midfield battle entirely. {value:.0f} "
         "line-breaking passes have gone straight into the same channel. {desc} {cite}"
     ),
+    "control_shift": (
+        "{team} have changed the rhythm of the match. The transparent control index "
+        "swung {value:.1f} points in their direction. {desc} {cite}"
+    ),
 }
 
 

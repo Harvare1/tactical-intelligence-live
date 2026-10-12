@@ -68,7 +68,7 @@ class Evidence:
 class Insight:
     id: str
     minute: int
-    category: Literal["pressing_trigger", "flank_overload", "progressive_channel"]
+    category: Literal["pressing_trigger", "flank_overload", "progressive_channel", "control_shift"]
     team: Literal["home", "away"]
     headline: str
     evidence: Evidence

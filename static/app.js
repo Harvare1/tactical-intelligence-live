@@ -39,7 +39,7 @@ function render() {
   const minute = Number(scrubber.value);
   minuteLabel.textContent = `${minute}'`;
   const visible = match.events.filter(event => event.minute <= minute);
-  const available = insights.filter(insight => insight.minute <= minute);
+  const available = insights.filter(insight => insight.minute <= minute).slice(-8);
   const evidence = new Set(selected?.evidence.event_ids || []);
   drawPitch();
   visible.slice(-150).forEach(event => eventPoint(event, evidence.has(event.id)));

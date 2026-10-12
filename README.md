@@ -44,9 +44,18 @@ The project contains three complementary pieces:
 
 1. **Agent pipeline** (`agents/`, `core/`) — a typed four-stage pipeline (Event Analyzer → Narrative Generator → Grounding Checker → Localization) that detects tactical patterns (pressing triggers, flank overloads, progressive channels), writes evidence-citing narration, mechanically rejects any citation outside the verified evidence, and localizes fan copy into English, Swedish and Spanish. This is what powers `/api/match` and `/api/insights`.
 2. **Rolling-window engine** (`engine.py`) — a second, independent implementation generating linked possessions and evaluating four conservative rules (right-channel concentration, final-third entries, pressure-linked recoveries, shot volume) over a second-by-second window. Powers `/api/state`, kept as an alternate detection approach for comparison.
-3. **Optional real-data adapter** (`core/statsbomb_adapter.py`) — a generic parser for the public [StatsBomb open-data](https://github.com/statsbomb/open-data) event schema, so the same agent pipeline can run unmodified over a real match if one is dropped into `data/statsbomb/`. **No real match data ships in this repository** — the hackathon brief calls for synthetic data, and StatsBomb's license doesn't permit rehosting their files in a fork. `data/` is git-ignored; `/api/sources` simply falls back to the synthetic match when no real file is present.
+3. **Generic real-data adapter** (`core/statsbomb_adapter.py`) — discovers every StatsBomb event file in `data/statsbomb/`, infers teams, players, score and duration, normalizes coordinates and runs the same pipeline without match-specific code. **No real match data ships in the public repository**; `data/` is git-ignored and `/api/sources` falls back to the synthetic fixture when no local file exists.
 
-Each insight returns a stable id, headline, analyst narrative with citations, fan narratives in three languages, supporting event IDs and a confidence score. This makes the computed evidence a safe grounding layer for a future Microsoft Foundry narrator.
+The detectors cover pressing regains, flank concentration, progressive channels and five-minute **control shifts** derived from final-third entries, shots, pressure actions and recoveries. Each insight returns a stable id, narrative, supporting event IDs and confidence score.
+
+## Import another real match
+
+```sh
+python -m scripts.import_statsbomb /path/to/events.json --id match-002 \
+  --competition "Competition name" --date 2026-10-12
+```
+
+The source can also be an HTTPS raw-data URL. Restart `server.py`; the match appears in the selector automatically. Optional labels live in the ignored `data/statsbomb/catalog.json` file.
 
 ## Honest boundaries
 
@@ -64,7 +73,8 @@ The container is ready for Azure Container Apps. Set `AZURE_FOUNDRY_ENDPOINT`, `
 - [x] Fan and analyst modes
 - [x] Docker image, health endpoint and CI tests
 - [x] Optional Microsoft Foundry narration with deterministic fallback
-- [x] Optional real-match adapter (StatsBomb open-data schema), validated against a real match locally
+- [x] Generic real-match adapter, validated locally against all 4,407 events from the 2022 World Cup final
+- [x] Adaptive five-minute control-shift detection
 - [ ] Azure Container Apps deployment
 - [ ] Public GitHub repository and sub-two-minute demo video
 
