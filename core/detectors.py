@@ -23,12 +23,16 @@ def _seconds(e: Event) -> int:
 
 
 def _cluster_by_time(items: list[tuple], key_time_idx: int, gap_seconds: int) -> list[list[tuple]]:
-    """Group a time-sorted list into clusters where consecutive gaps <= gap_seconds."""
+    """Group a time-sorted list into fixed-span windows.
+
+    Comparing against the window's first item prevents a chain of individually
+    close events from incorrectly becoming a match-long pattern.
+    """
     if not items:
         return []
     clusters: list[list[tuple]] = [[items[0]]]
     for item in items[1:]:
-        if item[key_time_idx] - clusters[-1][-1][key_time_idx] <= gap_seconds:
+        if item[key_time_idx] - clusters[-1][0][key_time_idx] <= gap_seconds:
             clusters[-1].append(item)
         else:
             clusters.append([item])

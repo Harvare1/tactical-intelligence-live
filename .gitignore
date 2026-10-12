@@ -2,3 +2,10 @@ __pycache__/
 *.pyc
 .env
 .venv/
+
+# Real StatsBomb open-data match files: not synthetic (hackathon requires
+# synthetic data) and StatsBomb's license doesn't permit rehosting their
+# data in a fork. Keep core/statsbomb_adapter.py (just a parser) but never
+# commit the data itself.
+data/
+

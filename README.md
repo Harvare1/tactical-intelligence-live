@@ -25,28 +25,28 @@ python server.py
 Open <http://localhost:8080>.
 
 ```sh
-python -m unittest discover -s tests -v
+pytest -q
 docker build -t tactical-intelligence-live .
 docker run --rm -p 8080:8080 tactical-intelligence-live
 ```
 
 Useful endpoints:
 
-- `GET /api/match` — scenario metadata
-- `GET /api/insights` — the grounded multi-agent output
-- `GET /api/state?second=3900` — rolling match state and evidence
+- `GET /api/sources` — which matches are loaded (synthetic, plus any real match dropped into `data/statsbomb/`)
+- `GET /api/match?source=<key>` — players + event stream for a given source
+- `GET /api/insights?source=<key>` — the grounded multi-agent output for that source
+- `GET /api/state?second=3900` — the separate rolling-window engine's state and evidence
 - `GET /health` — container health probe
 
 ## How it works
 
-The project contains two complementary demo paths. A typed four-stage pipeline detects scripted tactical patterns, creates evidence-citing narration, rejects unknown citations and localizes fan copy into English, Swedish and Spanish. A rolling-window engine generates linked possessions with passes, carries, recoveries and shots and evaluates four conservative rules:
+The project contains three complementary pieces:
 
-1. right-channel pass concentration;
-2. successful final-third entries;
-3. pressure-linked recoveries;
-4. shot volume and on-target count.
+1. **Agent pipeline** (`agents/`, `core/`) — a typed four-stage pipeline (Event Analyzer → Narrative Generator → Grounding Checker → Localization) that detects tactical patterns (pressing triggers, flank overloads, progressive channels), writes evidence-citing narration, mechanically rejects any citation outside the verified evidence, and localizes fan copy into English, Swedish and Spanish. This is what powers `/api/match` and `/api/insights`.
+2. **Rolling-window engine** (`engine.py`) — a second, independent implementation generating linked possessions and evaluating four conservative rules (right-channel concentration, final-third entries, pressure-linked recoveries, shot volume) over a second-by-second window. Powers `/api/state`, kept as an alternate detection approach for comparison.
+3. **Optional real-data adapter** (`core/statsbomb_adapter.py`) — a generic parser for the public [StatsBomb open-data](https://github.com/statsbomb/open-data) event schema, so the same agent pipeline can run unmodified over a real match if one is dropped into `data/statsbomb/`. **No real match data ships in this repository** — the hackathon brief calls for synthetic data, and StatsBomb's license doesn't permit rehosting their files in a fork. `data/` is git-ignored; `/api/sources` simply falls back to the synthetic match when no real file is present.
 
-Each insight returns a stable key, audience-ready summary, analyst explanation, confidence label, supporting event IDs and an explicit limitation. This makes the computed evidence a safe grounding layer for a future Microsoft Foundry narrator.
+Each insight returns a stable id, headline, analyst narrative with citations, fan narratives in three languages, supporting event IDs and a confidence score. This makes the computed evidence a safe grounding layer for a future Microsoft Foundry narrator.
 
 ## Honest boundaries
 
@@ -64,7 +64,8 @@ The container is ready for Azure Container Apps. Set `AZURE_FOUNDRY_ENDPOINT`, `
 - [x] Fan and analyst modes
 - [x] Docker image, health endpoint and CI tests
 - [x] Optional Microsoft Foundry narration with deterministic fallback
+- [x] Optional real-match adapter (StatsBomb open-data schema), validated against a real match locally
 - [ ] Azure Container Apps deployment
 - [ ] Public GitHub repository and sub-two-minute demo video
 
-No real club names, official match feeds, copyrighted footage, API keys or paid services are included.
+The public repository ships only the fictional, synthetic match (`Northside FC`, `Rivertown AFC`, `Northbridge`, `Riverside`). No real club names, match feeds, copyrighted footage, API keys or paid services are committed to it. The StatsBomb adapter is parser code only — point it at your own locally downloaded open-data file to try it; the data itself is never part of this repo.

@@ -10,7 +10,8 @@
 <body>
   <header>
     <h1>Tactical Intelligence <span class="live-dot"></span> LIVE</h1>
-    <div class="subtitle">Synthetic match &middot; explainable tactical insights, grounded in real events</div>
+    <div class="subtitle">Explainable tactical intelligence &middot; every claim linked to event evidence</div>
+    <label class="source-picker">Match <select id="sourceSelect" aria-label="Choose match"></select></label>
   </header>
 
   <main>
@@ -39,8 +40,9 @@
   </main>
 
   <footer>
-    Every insight cites the exact synthetic event ids it was computed from &mdash;
+    Every insight cites the exact event ids it was computed from &mdash;
     click one to see the evidence highlighted on the pitch.
+    <div id="attribution"></div>
   </footer>
 
   <script src="app.js"></script>

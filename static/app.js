@@ -4,6 +4,7 @@ const minuteLabel = document.getElementById('minuteLabel');
 const list = document.getElementById('insightList');
 const scoreline = document.getElementById('scoreline');
 const lang = document.getElementById('langSelect');
+const sourceSelect = document.getElementById('sourceSelect');
 let match, insights, playing = false, mode = 'analyst', selected = null;
 
 const ns = 'http://www.w3.org/2000/svg';
@@ -85,18 +86,34 @@ document.getElementById('playBtn').onclick = event => {
 };
 setInterval(() => {
   if (!playing) return;
-  scrubber.value = Math.min(90, Number(scrubber.value) + 1);
-  if (Number(scrubber.value) === 90) {
+  scrubber.value = Math.min(Number(scrubber.max), Number(scrubber.value) + 1);
+  if (Number(scrubber.value) === Number(scrubber.max)) {
     playing = false;
     document.getElementById('playBtn').textContent = '▶ Play';
   }
   render();
 }, 500);
 
-Promise.all([fetch('/api/match'), fetch('/api/insights')])
-  .then(async ([matchResponse, insightResponse]) => {
+async function loadSource(key) {
+  selected = null; playing = false; document.getElementById('playBtn').textContent = '▶ Play';
+  const query = '?source=' + encodeURIComponent(key);
+  const [matchResponse, insightResponse] = await Promise.all([fetch('/api/match' + query), fetch('/api/insights' + query)]);
     if (!matchResponse.ok || !insightResponse.ok) throw new Error('API unavailable');
     match = await matchResponse.json(); insights = await insightResponse.json();
-    scrubber.value = 70; render();
-  })
-  .catch(error => { list.textContent = `Unable to load match intelligence: ${error.message}`; });
+    scrubber.max = match.meta.duration || 90;
+    scrubber.value = Math.min(70, Number(scrubber.max));
+    const label = [match.meta.competition, match.meta.date, match.meta.score].filter(Boolean).join(' · ');
+    document.getElementById('attribution').textContent = `${label} · Data: ${match.meta.source}`;
+    render();
+}
+
+fetch('/api/sources').then(response => response.json()).then(payload => {
+  payload.matches.forEach(source => {
+    const option = document.createElement('option'); option.value = source.key;
+    option.textContent = `${source.kind === 'real' ? 'REAL' : 'TEST'} · ${source.home} v ${source.away}`;
+    sourceSelect.append(option);
+  });
+  sourceSelect.value = payload.default;
+  return loadSource(payload.default);
+}).catch(error => { list.textContent = `Unable to load match intelligence: ${error.message}`; });
+sourceSelect.onchange = () => loadSource(sourceSelect.value).catch(error => { list.textContent = error.message; });

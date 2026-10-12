@@ -20,6 +20,7 @@ body {
 
 header {
   padding: 16px 24px 4px;
+  position: relative;
 }
 header h1 {
   margin: 0;
@@ -40,6 +41,8 @@ header h1 {
   100% { box-shadow: 0 0 0 0 rgba(239,68,68,0); }
 }
 .subtitle { color: var(--muted); font-size: .85rem; margin-top: 2px; }
+.source-picker { position:absolute; right:24px; top:16px; color:var(--muted); font-size:.78rem; }
+.source-picker select { margin-left:8px; min-width:260px; background:var(--panel); color:var(--text); border:1px solid var(--panel-border); border-radius:7px; padding:7px 9px; }
 
 main {
   display: grid;
@@ -50,6 +53,8 @@ main {
 }
 @media (max-width: 900px) {
   main { grid-template-columns: 1fr; }
+  .source-picker { position:static; display:block; margin-top:12px; }
+  .source-picker select { min-width:0; max-width:75%; }
 }
 
 .pitch-panel, .insights-panel {
@@ -132,6 +137,7 @@ footer {
   padding: 8px 24px 24px;
   text-align: center;
 }
+#attribution { margin-top:5px; color:#aebbd1; }
 
 .ev-dot { opacity: .35; }
 .ev-dot.highlight { opacity: 1; stroke: #fff; stroke-width: 0.6; }
