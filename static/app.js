@@ -45,7 +45,13 @@ function render() {
   visible.slice(-150).forEach(event => eventPoint(event, evidence.has(event.id)));
   const goals = {home: 0, away: 0};
   visible.filter(event => event.type === 'goal').forEach(event => goals[event.team]++);
-  scoreline.textContent = `${match.teams.home} ${goals.home} — ${goals.away} ${match.teams.away}`;
+  scoreline.textContent = `${goals.home} — ${goals.away}`;
+  const latest = available.at(-1);
+  document.getElementById('currentStory').textContent = latest ? latest.headline.replace(latest.team, match.teams[latest.team]) : 'Reading the shape of the match…';
+  document.getElementById('currentStoryCopy').textContent = latest ? (mode === 'fan' ? latest.narrative[`fan_${lang.value}`] : latest.narrative.analyst_en.split('[')[0]) : 'Move through the timeline to reveal the strongest evidence-backed story at each moment.';
+  document.getElementById('currentMetric').textContent = latest ? (latest.evidence.metric === 'flank_share' ? Math.round(latest.evidence.value * 100) + '%' : latest.evidence.value) : '—';
+  document.getElementById('currentMetricLabel').textContent = latest ? latest.evidence.metric.replaceAll('_',' ').toUpperCase() : 'CONTROL SIGNAL';
+  document.getElementById('verifiedCount').textContent = available.length;
   renderInsights(available);
 }
 
@@ -53,7 +59,7 @@ function renderInsights(available) {
   list.replaceChildren();
   if (!available.length) {
     const empty = document.createElement('div');
-    empty.className = 'insight-card';
+    empty.className = 'empty-card';
     empty.innerHTML = '<div class="cat">SCANNING THE MATCH</div><div class="headline">No pattern has cleared the evidence threshold yet.</div><div class="evidence">Move to 20′, 50′ or 70′ to reveal the designed tactical stories.</div>';
     list.append(empty); return;
   }
@@ -104,6 +110,16 @@ async function loadSource(key) {
     scrubber.value = Math.min(70, Number(scrubber.max));
     const label = [match.meta.competition, match.meta.date, match.meta.score].filter(Boolean).join(' · ');
     document.getElementById('attribution').textContent = `${label} · Data: ${match.meta.source}`;
+    document.getElementById('competitionLabel').textContent = match.meta.competition || 'MATCH INTELLIGENCE';
+    document.getElementById('matchDate').textContent = match.meta.date || '';
+    document.getElementById('homeName').textContent = match.teams.home;
+    document.getElementById('awayName').textContent = match.teams.away;
+    document.querySelector('.club.home .crest').textContent = match.teams.home.slice(0,1);
+    document.querySelector('.club.away .crest').textContent = match.teams.away.slice(0,1);
+    document.getElementById('homeLegend').textContent = match.teams.home;
+    document.getElementById('awayLegend').textContent = match.teams.away;
+    document.getElementById('sourceBadge').textContent = match.kind === 'real' ? 'REAL MATCH DATA' : 'VALIDATION SCENARIO';
+    document.getElementById('mappedEvents').textContent = `${match.events.length.toLocaleString()} events analyzed`;
     render();
 }
 

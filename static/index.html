@@ -1,50 +1,15 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="description" content="Explainable live football intelligence backed by inspectable event evidence." />
-  <title>Tactical Intelligence Live</title>
-  <link rel="stylesheet" href="style.css" />
-</head>
-<body>
-  <header>
-    <h1>Tactical Intelligence <span class="live-dot"></span> LIVE</h1>
-    <div class="subtitle">Explainable tactical intelligence &middot; every claim linked to event evidence</div>
-    <label class="source-picker">Match <select id="sourceSelect" aria-label="Choose match"></select></label>
-  </header>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Explainable football intelligence for live broadcasts."><title>Tactical Intelligence Live</title><link rel="stylesheet" href="style.css"></head>
+<body><div class="app-shell">
+<header class="topbar"><a class="brand" href="#"><span class="brand-mark">TI</span><span><b>TACTICAL INTELLIGENCE</b><small>Evidence-led match stories</small></span></a><div class="top-actions"><label class="match-picker"><span>DATA SOURCE</span><select id="sourceSelect" aria-label="Choose match"></select></label><span class="live-pill"><i></i> LIVE ENGINE</span></div></header>
 
-  <main>
-    <section class="pitch-panel">
-      <div class="scoreline" id="scoreline">Northside FC 0 &ndash; 0 Rivertown AFC</div>
-      <svg id="pitch" viewBox="0 0 105 68" preserveAspectRatio="xMidYMid meet"></svg>
-      <div class="timeline">
-        <button id="playBtn">&#9654; Play</button>
-        <input id="scrubber" type="range" min="0" max="90" value="0" step="1" />
-        <span id="minuteLabel">0'</span>
-      </div>
-    </section>
+<main><section class="match-hero"><div class="match-context"><span class="kicker" id="competitionLabel">MATCH INTELLIGENCE</span><span id="matchDate"></span></div><div class="scoreboard"><div class="club home"><div class="crest">A</div><h1 id="homeName">Home</h1></div><div class="score-center"><div id="scoreline">0 — 0</div><span id="minuteLabel">0′</span></div><div class="club away"><h1 id="awayName">Away</h1><div class="crest alt">F</div></div></div><div class="hero-meta"><span id="sourceBadge">REAL MATCH DATA</span><span id="mappedEvents">— events analyzed</span><span>Every claim is inspectable</span></div></section>
 
-    <section class="insights-panel">
-      <div class="view-toggle">
-        <button class="mode-btn active" data-mode="analyst">Analyst view</button>
-        <button class="mode-btn" data-mode="fan">Fan view</button>
-        <select id="langSelect">
-          <option value="en">EN</option>
-          <option value="sv">SV</option>
-          <option value="es">ES</option>
-        </select>
-      </div>
-      <div id="insightList" class="insight-list"></div>
-    </section>
-  </main>
+<section class="story-strip"><div><span class="kicker">CURRENT READ</span><h2 id="currentStory">Reading the shape of the match…</h2><p id="currentStoryCopy">Move through the timeline to reveal the strongest evidence-backed story at each moment.</p></div><div class="story-metric"><strong id="currentMetric">—</strong><span id="currentMetricLabel">CONTROL SIGNAL</span></div></section>
 
-  <footer>
-    Every insight cites the exact event ids it was computed from &mdash;
-    click one to see the evidence highlighted on the pitch.
-    <div id="attribution"></div>
-  </footer>
+<div class="workspace"><section class="visual-panel panel"><div class="panel-head"><div><span class="kicker">TACTICAL MAP</span><b>Last visible match actions</b></div><div class="legend"><span><i class="home-dot"></i><span id="homeLegend">Home</span></span><span><i class="away-dot"></i><span id="awayLegend">Away</span></span></div></div><div class="pitch-frame"><svg id="pitch" viewBox="0 0 105 68" preserveAspectRatio="xMidYMid meet" aria-label="Match event map"></svg><div class="attack-label left">← ATTACK</div><div class="attack-label right">ATTACK →</div></div><div class="playback"><button id="playBtn" class="play" aria-label="Play match">▶</button><div class="range-wrap"><input id="scrubber" type="range" min="0" max="90" value="0" step="1"><div class="timeline-labels"><span>0′</span><span>HALF</span><span>FULL TIME</span></div></div></div></section>
 
-  <script src="app.js"></script>
-</body>
-</html>
+<aside class="intelligence-panel panel"><div class="panel-head"><div><span class="kicker">MATCH STORY</span><b>What matters now</b></div><div class="view-controls"><button class="mode-btn active" data-mode="analyst">Analyst</button><button class="mode-btn" data-mode="fan">Fan</button><select id="langSelect"><option value="en">EN</option><option value="sv">SV</option><option value="es">ES</option></select></div></div><div id="insightList" class="insight-list"></div></aside></div>
+
+<section class="proof-bar"><div><span class="kicker">TRUST LAYER</span><b>Explanation first. Evidence underneath.</b></div><p>Signals are computed from match events before narration. Select any story to highlight every supporting action on the pitch.</p><div class="proof-stat"><strong id="verifiedCount">0</strong><span>VERIFIED SIGNALS</span></div></section>
+</main>
+<footer><span>TACTICAL INTELLIGENCE LIVE · PROTOTYPE</span><span id="attribution"></span></footer></div><script src="app.js"></script></body></html>
