@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Explainable live football intelligence backed by inspectable event evidence." />
+  <title>Tactical Intelligence Live</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <h1>Tactical Intelligence <span class="live-dot"></span> LIVE</h1>
+    <div class="subtitle">Synthetic match &middot; explainable tactical insights, grounded in real events</div>
+  </header>
+
+  <main>
+    <section class="pitch-panel">
+      <div class="scoreline" id="scoreline">Northside FC 0 &ndash; 0 Rivertown AFC</div>
+      <svg id="pitch" viewBox="0 0 105 68" preserveAspectRatio="xMidYMid meet"></svg>
+      <div class="timeline">
+        <button id="playBtn">&#9654; Play</button>
+        <input id="scrubber" type="range" min="0" max="90" value="0" step="1" />
+        <span id="minuteLabel">0'</span>
+      </div>
+    </section>
+
+    <section class="insights-panel">
+      <div class="view-toggle">
+        <button class="mode-btn active" data-mode="analyst">Analyst view</button>
+        <button class="mode-btn" data-mode="fan">Fan view</button>
+        <select id="langSelect">
+          <option value="en">EN</option>
+          <option value="sv">SV</option>
+          <option value="es">ES</option>
+        </select>
+      </div>
+      <div id="insightList" class="insight-list"></div>
+    </section>
+  </main>
+
+  <footer>
+    Every insight cites the exact synthetic event ids it was computed from &mdash;
+    click one to see the evidence highlighted on the pitch.
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
