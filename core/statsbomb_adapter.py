@@ -67,7 +67,8 @@ def load_match(path: Path, metadata: dict | None = None) -> tuple[list[Player], 
             second=int(item.get("second", 0)), type=kind, team=team, player_id=player_id,
             x=round(start[0], 2), y=round(start[1], 2),
             target_x=round(end[0], 2) if end else None, target_y=round(end[1], 2) if end else None,
-            outcome="failed" if failed else "success"))
+            outcome="failed" if failed else "success",
+            xg=float(payload.get("statsbomb_xg")) if payload.get("statsbomb_xg") is not None else None))
 
     events.sort(key=lambda event: (event.minute, event.second, event.id))
     score = Counter(event.team for event in events if event.type == "goal")

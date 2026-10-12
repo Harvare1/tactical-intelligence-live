@@ -5,7 +5,7 @@ const list = document.getElementById('insightList');
 const scoreline = document.getElementById('scoreline');
 const lang = document.getElementById('langSelect');
 const sourceSelect = document.getElementById('sourceSelect');
-let match, insights, playing = false, mode = 'analyst', selected = null;
+let match, insights, forecasts = [], playing = false, mode = 'analyst', selected = null;
 
 const ns = 'http://www.w3.org/2000/svg';
 const make = (tag, attrs = {}) => {
@@ -52,7 +52,24 @@ function render() {
   document.getElementById('currentMetric').textContent = latest ? (latest.evidence.metric === 'flank_share' ? Math.round(latest.evidence.value * 100) + '%' : latest.evidence.value) : '—';
   document.getElementById('currentMetricLabel').textContent = latest ? latest.evidence.metric.replaceAll('_',' ').toUpperCase() : 'CONTROL SIGNAL';
   document.getElementById('verifiedCount').textContent = available.length;
+  renderForecast(forecasts.filter(item => item.minute <= minute).at(-1));
   renderInsights(available);
+}
+
+function renderForecast(item) {
+  const values = item ? {
+    home: Math.round(item.probabilities.home),
+    draw: Math.round(item.probabilities.draw),
+    away: Math.round(item.probabilities.away)
+  } : {home: 0, draw: 0, away: 0};
+  document.getElementById('forecastScore').textContent = item ? item.most_likely_score : 'AVAILABLE AT 15′';
+  ['home', 'draw', 'away'].forEach(key => {
+    document.getElementById(key + 'Prob').style.width = values[key] + '%';
+    document.getElementById(key + 'ProbText').textContent = item ? values[key] + '%' : '—';
+  });
+  document.getElementById('forecastMeta').textContent = item
+    ? `${item.minute}′ update · xG ${item.xg.home.toFixed(2)}–${item.xg.away.toFixed(2)} · visible events only`
+    : 'First calculation after 15 minutes · then every 10 minutes';
 }
 
 function renderInsights(available) {
@@ -103,9 +120,11 @@ setInterval(() => {
 async function loadSource(key) {
   selected = null; playing = false; document.getElementById('playBtn').textContent = '▶ Play';
   const query = '?source=' + encodeURIComponent(key);
-  const [matchResponse, insightResponse] = await Promise.all([fetch('/api/match' + query), fetch('/api/insights' + query)]);
-    if (!matchResponse.ok || !insightResponse.ok) throw new Error('API unavailable');
-    match = await matchResponse.json(); insights = await insightResponse.json();
+  const [matchResponse, insightResponse, forecastResponse] = await Promise.all([
+    fetch('/api/match' + query), fetch('/api/insights' + query), fetch('/api/forecasts' + query)
+  ]);
+    if (!matchResponse.ok || !insightResponse.ok || !forecastResponse.ok) throw new Error('API unavailable');
+    match = await matchResponse.json(); insights = await insightResponse.json(); forecasts = await forecastResponse.json();
     scrubber.max = match.meta.duration || 90;
     scrubber.value = Math.min(70, Number(scrubber.max));
     const label = [match.meta.competition, match.meta.date, match.meta.score].filter(Boolean).join(' · ');

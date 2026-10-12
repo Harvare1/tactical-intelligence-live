@@ -45,6 +45,7 @@ class Event:
     target_x: float | None = None
     target_y: float | None = None
     outcome: Literal["success", "failed"] = "success"
+    xg: float | None = None
 
     @property
     def timestamp(self) -> str:

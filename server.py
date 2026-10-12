@@ -10,6 +10,7 @@ from urllib.parse import parse_qs, urlparse
 from agents.pipeline import TacticalIntelligencePipeline
 from core.match_generator import TEAM_NAMES, generate_match
 from core.statsbomb_adapter import discover_matches
+from core.forecast import forecast_timeline
 from engine import analyze, simulate
 
 ROOT, STATIC = Path(__file__).parent, Path(__file__).parent / "static"
@@ -23,11 +24,13 @@ def build_sources():
             "kind": "real", "meta": meta, "teams": {"home": meta["home"], "away": meta["away"]},
             "players": match["players"], "events": match["events"],
             "insights": TacticalIntelligencePipeline().run(match["events"]),
+            "forecasts": forecast_timeline(match["events"]),
         }
     players, events = generate_match(seed=42)
     sources["synthetic"] = {
         "kind": "synthetic", "teams": TEAM_NAMES, "players": players, "events": events,
         "insights": TacticalIntelligencePipeline().run(events),
+        "forecasts": forecast_timeline(events),
         "meta": {"id": "synthetic", "home": TEAM_NAMES["home"], "away": TEAM_NAMES["away"],
                  "competition": "Designed validation scenario", "date": "", "score": "1–0",
                  "duration": 90, "source": "Generated locally", "source_url": ""},
@@ -60,12 +63,14 @@ class Handler(BaseHTTPRequestHandler):
         if route.path == "/api/sources":
             rows = [{"key": key, "kind": item["kind"], **item["meta"]} for key, item in SOURCES.items()]
             return self._send(200, _json({"default": DEFAULT_SOURCE, "matches": rows}), "application/json")
-        if route.path in ("/api/match", "/api/insights"):
+        if route.path in ("/api/match", "/api/insights", "/api/forecasts"):
             key, source = _source(query)
             if source is None:
                 return self.send_error(404, "unknown source")
             if route.path == "/api/insights":
                 return self._send(200, _json([dataclasses.asdict(i) for i in source["insights"]]), "application/json")
+            if route.path == "/api/forecasts":
+                return self._send(200, _json(source["forecasts"]), "application/json")
             body = {"source_key": key, "kind": source["kind"], "teams": source["teams"],
                     "meta": source["meta"], "players": [dataclasses.asdict(p) for p in source["players"]],
                     "events": [dataclasses.asdict(e) for e in source["events"]]}
